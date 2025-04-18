@@ -6,7 +6,6 @@ import time
 from canlib import canlib, Frame
 
 if __name__ == '__main__':
-
     GUI.init()
 
     ch0 = setUpChannel(0)
@@ -20,6 +19,7 @@ if __name__ == '__main__':
             GUI.WRITE_QUEUE = False
             
             ch0.write(Frame(id_=6, data=GUI.get_bytestr()))
+            ch0.write(Frame(id_=7, data=GUI.get_bytestr_t()))
 
         try:
             while (frame := ch0.read()) is not canlib.canNoMsg:

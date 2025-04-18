@@ -23,6 +23,17 @@ class GUI:
         return b02 + b24 + b46 + b68
     
     @staticmethod
+    def get_bytestr_t():
+        zero = 0
+
+        b02 = dpg.get_value(GUI.TORQUE_MAX).to_bytes(2, 'little')
+        b24 = dpg.get_value(GUI.TORQUE_MIN).to_bytes(2, 'little')
+        b46 = zero.to_bytes(2, 'little')
+        b68 = dpg.get_value(GUI.BRAKES_THREASHOLD).to_bytes(2, 'little')
+
+        return b02 + b24 + b46 + b68
+
+    @staticmethod
     def vcb(sender, app_data, user_data):
         GUI.APPS_VALS[sender] = app_data
         
@@ -76,6 +87,8 @@ class GUI:
             dpg.set_value(GUI.TORQUE_MAX, max_torque)
         if min_torque != None:
             dpg.set_value(GUI.TORQUE_MIN, min_torque)
+        if brakes_threashold != None:
+            dpg.set_value(GUI.BRAKES_THREASHOLD, brakes_threashold)
 
     @staticmethod
     def vct(sender, app_data, user_data):
@@ -107,11 +120,11 @@ class GUI:
         fault = 0
         
         if abs(GUI.CALC_APPS_VALS[0] - GUI.CALC_APPS_VALS[1]) > 0.1:
+            fault = 2
+        elif (GUI.CALC_APPS_VALS[0] > 1.15 or GUI.CALC_APPS_VALS[1] > 1.15):
             fault = 1
-        elif (GUI.CALC_APPS_VALS[0] > 1.0 or GUI.CALC_APPS_VALS[1] > 1.0):
-            fault = 2
-        elif(GUI.CALC_APPS_VALS[0] < 0.0 or GUI.CALC_APPS_VALS[1] < 0.0):
-            fault = 2
+        elif(GUI.CALC_APPS_VALS[0] < -0.15 or GUI.CALC_APPS_VALS[1] < -0.15):
+            fault = 1
 
         torque = quick_remap(0.0,1.0,0.0,dpg.get_value(GUI.TORQUE_MAX),capp)
 
@@ -176,6 +189,7 @@ class GUI:
                 with dpg.group():
                     GUI.TORQUE_MAX = dpg.add_drag_int(label="T-MAX", width=100, max_value=2300, callback=GUI.vct)
                     GUI.TORQUE_MIN = dpg.add_drag_int(label="REGEN", width=100, max_value=2300, callback=GUI.vct)
+                    GUI.BRAKES_THREASHOLD = dpg.add_drag_int(label="BRAKE", width=100, max_value=4092, callback=GUI.vct)
                 with dpg.group():
                     GUI.TORQUE_CALC = dpg.add_text("TORQUE: ")
                
